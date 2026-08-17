@@ -1,0 +1,29 @@
+# Ambiente
+.env
+.env.local
+
+# Editor
+.vscode
+
+# Node (Angular)
+node_modules/
+**/node_modules/
+dist/
+.angular/
+
+# Go
+**/main
+**/*.exe
+**/tmp/
+**/vendor/
+
+# Banco de dados local
+*.db
+*.sqlite
+
+# Documentação Swagger gerada
+# **/docs/
+
+# SO
+.DS_Store
+Thumbs.db

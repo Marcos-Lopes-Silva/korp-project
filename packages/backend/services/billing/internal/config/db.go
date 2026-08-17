@@ -2,6 +2,7 @@ package config
 
 import (
 	"billing/internal/models"
+	"os"
 
 	"fmt"
 
@@ -12,7 +13,7 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	dsn := "host=localhost user=postgres password=postgres dbname=korp_invoice port=5432 sslmode=disable"
+	dsn := fmt.Sprintf("host=%s user=postgres password=postgres dbname=%s port=5432 sslmode=disable", os.Getenv("DB_HOST"), os.Getenv(("DB_NAME")))
 
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

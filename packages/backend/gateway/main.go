@@ -6,6 +6,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +16,20 @@ func newProxy(targetURL string) *httputil.ReverseProxy {
 	if err != nil {
 		log.Fatalf("URL inválida: %v", err)
 	}
-	return httputil.NewSingleHostReverseProxy(target)
+
+	proxy := httputil.NewSingleHostReverseProxy(target)
+	proxy.Transport = &http.Transport{
+		ResponseHeaderTimeout: 5 * time.Second,
+	}
+
+	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		log.Printf("erro ao rotear pra %s: %v", targetURL, err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte(`{"error":"serviço temporariamente indisponível"}`))
+	}
+
+	return proxy
 }
 
 func main() {
