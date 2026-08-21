@@ -27,8 +27,8 @@ func main() {
 	router.GET("/products/:id", handler.GetProductByID)
 	router.PUT("/products/:id", handler.UpdateProduct)
 	router.DELETE("/products/:id", handler.DeleteProduct)
-	router.POST("/products/:id/reduce-stock", handler.ReduceStock)
-	router.POST("/products/:id/restore-stock", handler.RestoreStock)
+	router.PATCH("/products/:id/reduce-stock", handler.ReduceStock)
+	router.PATCH("/products/:id/restore-stock", handler.RestoreStock)
 	router.GET("/products/:id/availability", handler.VerifyAvailability)
 
 	router.GET("/health", func(c *gin.Context) {
@@ -37,5 +37,5 @@ func main() {
 		})
 	})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run(":8080")
+	router.Run(":8081")
 }

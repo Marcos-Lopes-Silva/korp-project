@@ -13,23 +13,29 @@ import (
 type InvoiceService struct {
 	repo        *repository.InvoiceRepository
 	stockClient *clients.StockClient
+	pdfService  *PDFService
 }
 
 func NewInvoiceService(repo *repository.InvoiceRepository, stockClient *clients.StockClient) *InvoiceService {
 	return &InvoiceService{repo: repo, stockClient: stockClient}
 }
 
-func (s *InvoiceService) CreateInvoice() (*models.Invoice, error) {
-	invoice := &models.Invoice{
-		ID:    uuid.New(),
-		Items: []*models.InvoiceItem{},
+func (s *InvoiceService) CreateInvoice(name string, address string) (*models.Invoice, error) {
+	if name == "" || address == "" {
+		return nil, apperrors.ErrInvalidInput
 	}
+
+	invoice := models.CreateInvoice(name, address, []*models.InvoiceItem{})
 
 	if err := s.repo.CreateInvoice(invoice); err != nil {
 		return nil, apperrors.ErrServiceUnavailable
 	}
 
 	return invoice, nil
+}
+
+func (s *InvoiceService) GetInvoices() ([]models.Invoice, error) {
+	return s.repo.GetAllInvoices()
 }
 
 func (s *InvoiceService) AddItem(context context.Context, invoiceID, productID uuid.UUID, quantity int64) (*models.Invoice, error) {
@@ -46,7 +52,7 @@ func (s *InvoiceService) AddItem(context context.Context, invoiceID, productID u
 	err = s.stockClient.ReduceStock(context, productID, quantity)
 
 	if err != nil {
-		return nil, err
+		return nil, apperrors.ErrNotFound
 	}
 
 	item := &models.InvoiceItem{
@@ -77,21 +83,21 @@ func (s *InvoiceService) GetInvoice(id uuid.UUID) (*models.Invoice, error) {
 	return invoice, nil
 }
 
-func (s *InvoiceService) PrintInvoice(ctx context.Context, id uuid.UUID) (*models.Invoice, error) {
+func (s *InvoiceService) PrintInvoice(ctx context.Context, id uuid.UUID) ([]byte, error) {
 	invoice, err := s.repo.GetInvoice(id)
 	if err != nil {
 		return nil, apperrors.ErrNotFound
 	}
 
-	if invoice.Status != "Aberta" {
-		return nil, apperrors.ErrInvoiceNotOpened
-	}
+	// if invoice.Status != "Aberta" {
+	// 	return nil, apperrors.ErrInvoiceNotOpened
+	// }
 
-	for _, item := range invoice.Items {
-		if err := s.stockClient.ReduceStock(ctx, item.ProductID, item.Quantity); err != nil {
-			return nil, err
-		}
-	}
+	// for _, item := range invoice.Items {
+	// 	if err := s.stockClient.ReduceStock(ctx, item.ProductID, item.Quantity); err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	invoice.Status = "Fechada"
 	invoice.TotalPrice = invoice.CalculateInvoiceTotalAmount()
@@ -100,5 +106,10 @@ func (s *InvoiceService) PrintInvoice(ctx context.Context, id uuid.UUID) (*model
 		return nil, apperrors.ErrServiceUnavailable
 	}
 
-	return invoice, nil
+	pdfBytes, err := s.pdfService.GenerateInvoicePDF(invoice)
+	if err != nil {
+		return nil, apperrors.ErrServiceUnavailable
+	}
+
+	return pdfBytes, nil
 }

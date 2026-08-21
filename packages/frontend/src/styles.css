@@ -3,6 +3,194 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-archivo: 'Archivo Black', sans-serif;
-  --font-sans: 'Geist Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Spectral', serif;
+  --font-mono: 'Geist Mono', monospace;
+
+  --color-paper: #F5F6F3;
+  --color-surface: #FFFFFF;
+  --color-ink: #1B2430;
+  --color-forest: #2F5D50;
+  --color-forest-dark: #1E3F36;
+  --color-forest-light: #E8EFEC;
+  --color-brass: #B8863C;
+  --color-brick: #B23A34;
+  --color-line: #DFE3DE;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.stub {
+  position: relative;
+  border: 1.5px dashed #C7CFC9;
+}
+
+.stub::before,
+.stub::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: var(--color-paper);
+  border-radius: 999px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.stub::before {
+  left: -12px;
+}
+
+.stub::after {
+  right: -12px;
+}
+
+@media (max-width: 768px) {
+
+  .stub::before,
+  .stub::after {
+    display: none;
+  }
+}
+
+.pulse-dot {
+  box-shadow: 0 0 0 0 rgba(63, 143, 110, 0.55);
+  animation: pulse 2.2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(63, 143, 110, 0.45);
+  }
+
+  70% {
+    box-shadow: 0 0 0 7px rgba(63, 143, 110, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(63, 143, 110, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+}
+
+.console-panel {
+  background: #1E3F36;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(63, 143, 110, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.console-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3F8F6E, transparent);
+  opacity: 0.6;
+}
+
+.tech-field .mat-mdc-text-field-wrapper {
+  border-radius: 6px;
+}
+
+.tech-field .mdc-notched-outline__leading,
+.tech-field .mdc-notched-outline__notch,
+.tech-field .mdc-notched-outline__trailing {
+  border-color: var(--color-line) !important;
+}
+
+.tech-field.mat-focused .mdc-notched-outline__leading,
+.tech-field.mat-focused .mdc-notched-outline__notch,
+.tech-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #3F8F6E !important;
+  box-shadow: 0 0 0 3px rgba(63, 143, 110, 0.12);
+}
+
+.tech-field input,
+.tech-field .mat-mdc-select-value {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+}
+
+.tech-field mat-label {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+}
+
+.tech-field--dark .mdc-notched-outline__leading,
+.tech-field--dark .mdc-notched-outline__notch,
+.tech-field--dark .mdc-notched-outline__trailing {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.tech-field--dark.mat-focused .mdc-notched-outline__leading,
+.tech-field--dark.mat-focused .mdc-notched-outline__notch,
+.tech-field--dark.mat-focused .mdc-notched-outline__trailing {
+  border-color: #3F8F6E !important;
+  box-shadow: 0 0 0 3px rgba(63, 143, 110, 0.2);
+}
+
+.tech-field--dark input,
+.tech-field--dark .mat-mdc-select-value,
+.tech-field--dark mat-label {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-family: var(--font-mono);
+}
+
+.tech-field--dark .mat-mdc-select-arrow {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.tech-btn {
+  font-family: var(--font-mono) !important;
+  letter-spacing: 0.02em;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.tech-btn:not(:disabled):hover {
+  border-color: #3F8F6E !important;
+  background: rgba(63, 143, 110, 0.1) !important;
+}
+
+.toast-success .mdc-snackbar__surface {
+  background-color: #1E3F36 !important;
+}
+
+.toast-success .mdc-snackbar__label {
+  color: #E8EFEC !important;
+  font-family: var(--font-sans);
+}
+
+.toast-error .mdc-snackbar__surface {
+  background-color: #4A2320 !important;
+}
+
+.toast-error .mdc-snackbar__label {
+  color: #F4DAD8 !important;
+  font-family: var(--font-sans);
+}
+
+.chip-aberta {
+  --mdc-chip-elevated-container-color: rgba(184, 134, 60, 0.15);
+  --mdc-chip-label-text-color: #B8863C;
+}
+
+.chip-fechada {
+  --mdc-chip-elevated-container-color: #E8EFEC;
+  --mdc-chip-label-text-color: #2F5D50;
 }

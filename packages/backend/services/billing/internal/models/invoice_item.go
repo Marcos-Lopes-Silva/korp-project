@@ -7,11 +7,12 @@ import (
 )
 
 type InvoiceItem struct {
-	ProductID uuid.UUID
-	Name      string
-	Quantity  int64
-	Price     int64
-	SKU       string
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	InvoiceID uuid.UUID `gorm:"type:uuid" json:"invoiceId"`
+	ProductID uuid.UUID `json:"productId"`
+	Quantity  int64     `json:"quantity"`
+	Name      string    `json:"name"`
+	Price     int64     `json:"price"`
 }
 
 func (i *InvoiceItem) CalculateTotalAmount() int64 {

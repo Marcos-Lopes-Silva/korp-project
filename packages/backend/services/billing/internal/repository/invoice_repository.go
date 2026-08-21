@@ -27,6 +27,14 @@ func (r *InvoiceRepository) GetInvoice(id uuid.UUID) (*models.Invoice, error) {
 	return &invoice, nil
 }
 
+func (r *InvoiceRepository) GetAllInvoices() ([]models.Invoice, error) {
+	var invoices []models.Invoice
+	if err := r.db.Preload("Items").Find(&invoices).Error; err != nil {
+		return nil, err
+	}
+	return invoices, nil
+}
+
 func (r *InvoiceRepository) UpdateInvoice(invoice *models.Invoice) error {
 	return r.db.Save(invoice).Error
 }

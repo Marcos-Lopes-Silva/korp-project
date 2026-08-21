@@ -1,0 +1,111 @@
+<div class="max-w-7xl mx-auto px-6 md:px-10 py-8">
+
+  <header class="flex items-end justify-between mb-8">
+    <div>
+      <p class="text-[11px] font-mono tracking-wider text-ink/40 mb-1">MÓD. 01</p>
+      <h1 class="font-serif text-[26px] text-ink">Estoque</h1>
+    </div>
+
+    <mat-form-field appearance="outline" class="w-72" subscriptSizing="dynamic">
+      <mat-icon matPrefix class="text-ink/40 mr-1">search</mat-icon>
+      <input matInput placeholder="Pesquisar por nome ou SKU..." [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)" />
+    </mat-form-field>
+  </header>
+
+  <form (ngSubmit)="save()" class="bg-surface border border-line rounded-md px-6 py-5 mb-8">
+    <p class="text-[11px] uppercase tracking-wider text-ink/45 mb-4">
+      {{ editingProduct() ? 'Editar produto' : 'Novo produto' }}
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Nome</mat-label>
+        <input matInput [(ngModel)]="formModel.name" name="name" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>SKU</mat-label>
+        <input matInput class="font-mono" [(ngModel)]="formModel.sku" name="sku" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Quantidade</mat-label>
+        <input matInput type="number" min="0" [(ngModel)]="formModel.quantity" name="quantity" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Preço</mat-label>
+        <span matPrefix class="mr-1 text-ink/50">R$</span>
+        <input matInput type="number" step="0.01" min="0" [(ngModel)]="formModel.price" name="price" required />
+      </mat-form-field>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button mat-flat-button color="primary" type="submit">
+        <mat-icon>check</mat-icon>
+        {{ editingProduct() ? 'Salvar edição' : 'Adicionar produto' }}
+      </button>
+
+      @if (editingProduct()) {
+      <button mat-stroked-button type="button" (click)="cancelEdit()">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      }
+    </div>
+  </form>
+
+  <div class="bg-surface border border-line rounded-md overflow-hidden">
+    <table mat-table [dataSource]="filteredProducts()" class="w-full">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let product" class="text-ink">{{ product.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="sku">
+        <th mat-header-cell *matHeaderCellDef>SKU</th>
+        <td mat-cell *matCellDef="let product" class="font-mono text-[13px] text-ink/70">{{ product.sku }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantity">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Qtd</th>
+        <td mat-cell *matCellDef="let product" class="text-right font-mono">
+          @if (product.quantity <= 5) { <mat-chip class="bg-brass/15! text-brass! min-h-6! text-[12px]!">{{
+            product.quantity }}</mat-chip>
+            } @else {
+            {{ product.quantity }}
+            }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Preço</th>
+        <td mat-cell *matCellDef="let product" class="text-right font-mono">
+          {{ product.price | currency: 'BRL' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Ações</th>
+        <td mat-cell *matCellDef="let product" class="text-right">
+          <button mat-icon-button (click)="startEdit(product)" aria-label="Editar">
+            <mat-icon class="text-ink/60">edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="remove(product)" aria-label="Remover">
+            <mat-icon class="text-brick!">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    @if (filteredProducts().length === 0) {
+    <p class="text-center text-ink/45 py-8 text-[13.5px]">Nenhum produto cadastrado ainda.</p>
+    }
+  </div>
+
+</div>

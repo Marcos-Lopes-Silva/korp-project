@@ -43,7 +43,7 @@ func (pc *ProductController) GetAllProducts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": products})
+	c.JSON(http.StatusOK, products)
 }
 
 // CreateProduct godoc
@@ -73,7 +73,7 @@ func (pc *ProductController) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": product})
+	c.JSON(http.StatusOK, product)
 }
 
 // GetProductByID godoc
@@ -107,7 +107,7 @@ func (pc *ProductController) GetProductByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": product})
+	c.JSON(http.StatusOK, product)
 }
 
 // UpdateProduct godoc
@@ -154,7 +154,7 @@ func (pc *ProductController) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": product})
+	c.JSON(http.StatusOK, product)
 }
 
 // DeleteProduct godoc
@@ -208,27 +208,22 @@ func (pc *ProductController) DeleteProduct(c *gin.Context) {
 // @Router /products/{id}/reduce-stock [post]
 func (pc *ProductController) ReduceStock(c *gin.Context) {
 	id := c.Param("id")
-	quantityStr := c.Query("quantity")
 
-	if id == "" {
-		apperrors.HandleError(c, apperrors.ErrInvalidInput)
-		return
-	}
-
-	uuid, err := uuid.Parse(id)
+	productID, err := uuid.Parse(id)
 	if err != nil {
 		apperrors.HandleError(c, apperrors.ErrInvalidInput)
 		return
 	}
 
-	quantity, err := strconv.Atoi(quantityStr)
-	if err != nil || quantity <= 0 {
+	var body struct {
+		Quantity int64 `json:"quantity" binding:"required,gt=0"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
 		apperrors.HandleError(c, apperrors.ErrInvalidInput)
 		return
 	}
 
-	err = pc.service.ReduceStock(uuid, quantity)
-	if err != nil {
+	if err := pc.service.ReduceStock(productID, body.Quantity); err != nil {
 		apperrors.HandleError(c, err)
 		return
 	}
@@ -250,27 +245,22 @@ func (pc *ProductController) ReduceStock(c *gin.Context) {
 // @Router /products/{id}/restore-stock [post]
 func (pc *ProductController) RestoreStock(c *gin.Context) {
 	id := c.Param("id")
-	quantityStr := c.Query("quantity")
 
-	if id == "" {
-		apperrors.HandleError(c, apperrors.ErrInvalidInput)
-		return
-	}
-
-	uuid, err := uuid.Parse(id)
+	productID, err := uuid.Parse(id)
 	if err != nil {
 		apperrors.HandleError(c, apperrors.ErrInvalidInput)
 		return
 	}
 
-	quantity, err := strconv.Atoi(quantityStr)
-	if err != nil || quantity <= 0 {
+	var body struct {
+		Quantity int64 `json:"quantity" binding:"required,gt=0"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
 		apperrors.HandleError(c, apperrors.ErrInvalidInput)
 		return
 	}
 
-	err = pc.service.RestoreStock(uuid, quantity)
-	if err != nil {
+	if err := pc.service.RestoreStock(productID, body.Quantity); err != nil {
 		apperrors.HandleError(c, err)
 		return
 	}
@@ -293,7 +283,7 @@ func (pc *ProductController) VerifyAvailability(c *gin.Context) {
 		return
 	}
 
-	quantity, err := strconv.Atoi(quantityStr)
+	quantity, err := strconv.ParseInt(quantityStr, 10, 10)
 	if err != nil || quantity <= 0 {
 		apperrors.HandleError(c, apperrors.ErrInvalidInput)
 		return

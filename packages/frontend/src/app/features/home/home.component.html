@@ -1,0 +1,75 @@
+<div class="flex min-h-screen w-full">
+  <main class="flex-1 px-6 md:px-10 py-8 ">
+
+    <header class="flex items-start justify-between mb-10">
+      <div>
+        <p class="text-xs uppercase tracking-wider text-ink/45 mb-1">{{ today }}</p>
+        <h1 class="font-serif text-[28px] text-ink">Bom dia, {{ userName }}</h1>
+      </div>
+    </header>
+
+    <section class="grid sm:grid-cols-2 gap-8 mb-12">
+
+      <a routerLink="/estoque"
+        class="stub bg-surface rounded-md px-7 py-6 flex flex-col gap-4 shadow-[0_1px_2px_rgba(27,36,48,0.05)] hover:shadow-[0_4px_16px_rgba(27,36,48,0.08)] transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono tracking-wider text-ink/40">MÓD. 01</span>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-forest-light text-forest">
+            {{ produtosCadastrados() }} itens
+          </span>
+        </div>
+        <div>
+          <h2 class="font-serif text-xl text-ink mb-1">Estoque</h2>
+          <p class="text-[13.5px] text-ink/55 leading-relaxed">Cadastre produtos e acompanhe o saldo disponível de cada
+            item.</p>
+        </div>
+        <span class="text-[13px] text-forest font-medium mt-1">Abrir estoque →</span>
+      </a>
+
+      <a routerLink="/faturamento"
+        class="stub bg-surface rounded-md px-7 py-6 flex flex-col gap-4 shadow-[0_1px_2px_rgba(27,36,48,0.05)] hover:shadow-[0_4px_16px_rgba(27,36,48,0.08)] transition-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono tracking-wider text-ink/40">MÓD. 02</span>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-brass/15 text-brass">
+            {{ notasAbertas() }} abertas
+          </span>
+        </div>
+        <div>
+          <h2 class="font-serif text-xl text-ink mb-1">Faturamento</h2>
+          <p class="text-[13.5px] text-ink/55 leading-relaxed">Emita notas fiscais, adicione itens e feche pedidos com
+            baixa automática.</p>
+        </div>
+        <span class="text-[13px] text-forest font-medium mt-1">Abrir faturamento →</span>
+      </a>
+
+    </section>
+
+    <section>
+      <p class="text-xs uppercase tracking-wider text-ink/45 mb-3">Resumo de hoje</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        <div class="bg-surface border border-line rounded-md px-5 py-4">
+          <p class="text-[11px] text-ink/45 mb-1.5">Produtos cadastrados</p>
+          <p class="font-mono text-2xl text-ink">{{ produtosCadastrados() }}</p>
+        </div>
+
+        <div class="bg-surface border border-line rounded-md px-5 py-4">
+          <p class="text-[11px] text-ink/45 mb-1.5">Notas abertas</p>
+          <p class="font-mono text-2xl text-brass">{{ notasAbertas() }}</p>
+        </div>
+
+        <div class="bg-surface border border-line rounded-md px-5 py-4">
+          <p class="text-[11px] text-ink/45 mb-1.5">Notas fechadas</p>
+          <p class="font-mono text-2xl text-forest">{{ notasFechadas() }}</p>
+        </div>
+
+        <div class="bg-surface border border-line rounded-md px-5 py-4">
+          <p class="text-[11px] text-ink/45 mb-1.5">Faturado (notas fechadas)</p>
+          <p class="font-mono text-2xl text-ink">{{ faturadoNoMes() | currency: 'BRL' }}</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>

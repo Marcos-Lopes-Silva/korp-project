@@ -1,6 +1,7 @@
-package controllers
+package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,17 @@ func NewInvoiceController(service *services.InvoiceService) *InvoiceController {
 }
 
 func (h *InvoiceController) CreateInvoice(c *gin.Context) {
-	invoice, err := h.service.CreateInvoice()
+	var newInvoice struct {
+		Name    string `json:"name" binding:"required"`
+		Address string `json:"address" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&newInvoice); err != nil {
+		apperrors.HandleError(c, apperrors.ErrInvalidInput)
+		return
+	}
+
+	invoice, err := h.service.CreateInvoice(newInvoice.Name, newInvoice.Address)
 	if err != nil {
 		apperrors.HandleError(c, err)
 		return
@@ -66,6 +77,17 @@ func (h *InvoiceController) GetInvoice(c *gin.Context) {
 	c.JSON(http.StatusOK, invoice)
 }
 
+func (h *InvoiceController) GetInvoices(c *gin.Context) {
+	invoices, err := h.service.GetInvoices()
+
+	if err != nil {
+		apperrors.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, invoices)
+}
+
 func (h *InvoiceController) PrintInvoice(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -73,10 +95,15 @@ func (h *InvoiceController) PrintInvoice(c *gin.Context) {
 		return
 	}
 
-	invoice, err := h.service.PrintInvoice(c.Request.Context(), id)
+	pdfBytes, err := h.service.PrintInvoice(c.Request.Context(), id)
 	if err != nil {
 		apperrors.HandleError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, invoice)
+
+	filename := fmt.Sprintf("invoice_%s.pdf", id)
+
+	c.Header("Content-Type", "application/pdf")
+	c.Header("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", filename))
+	c.Data(http.StatusOK, "application/pdf", pdfBytes)
 }

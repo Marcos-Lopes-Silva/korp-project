@@ -1,0 +1,163 @@
+<div class="max-w-5xl mx-auto px-6 md:px-10 py-8">
+
+  <header class="flex items-end justify-between mb-8">
+    <div>
+      <p class="text-[11px] font-mono tracking-wider text-ink/40 mb-1">MÓD. 02</p>
+      <h1 class="font-serif text-[26px] text-ink">Faturamento</h1>
+    </div>
+
+    <mat-form-field appearance="outline" class="tech-field w-72" subscriptSizing="dynamic">
+      <mat-icon matPrefix class="text-forest/60 mr-1">search</mat-icon>
+      <input matInput placeholder="Pesquisar por cliente ou número..." [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)" />
+    </mat-form-field>
+  </header>
+
+  <form (ngSubmit)="createInvoice()" class="bg-surface border border-line rounded-md px-6 py-5 mb-8">
+    <p class="text-[11px] uppercase tracking-wider text-ink/45 mb-4">Nova nota fiscal</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+      <mat-form-field appearance="outline" class="tech-field" subscriptSizing="dynamic">
+        <mat-label>Cliente</mat-label>
+        <input matInput [(ngModel)]="formModel.name" name="name" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tech-field" subscriptSizing="dynamic">
+        <mat-label>Endereço</mat-label>
+        <input matInput [(ngModel)]="formModel.address" name="address" required />
+      </mat-form-field>
+    </div>
+
+    <button mat-flat-button type="submit">
+      <mat-icon>add</mat-icon>
+      Criar nota (Aberta)
+    </button>
+  </form>
+
+  <div class="bg-surface border border-line rounded-md overflow-hidden mb-8">
+    <table mat-table [dataSource]="filteredInvoices()" class="w-full">
+
+      <ng-container matColumnDef="seqCode">
+        <th mat-header-cell *matHeaderCellDef>Nº</th>
+        <td mat-cell *matCellDef="let invoice" class="font-mono text-[13px] text-ink/70">
+          #{{ invoice.seqCode }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let invoice" class="text-ink">{{ invoice.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let invoice">
+          @if (invoice.status === 'Aberta') {
+          <mat-chip class="bg-brass/15! text-brass! min-h-6! text-[12px]!">Aberta</mat-chip>
+          } @else {
+          <mat-chip class="bg-forest-light! text-forest! min-h-6! text-[12px]!">Fechada</mat-chip>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="items">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Itens</th>
+        <td mat-cell *matCellDef="let invoice" class="text-right font-mono">
+          {{ invoice.items?.length ?? 0 }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+        <td mat-cell *matCellDef="let invoice" class="text-right font-mono">
+          {{ (invoice.totalPrice ?? 0) | currency: 'BRL' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Ações</th>
+        <td mat-cell *matCellDef="let invoice" class="text-right">
+          <button mat-icon-button (click)="manageItems(invoice)" aria-label="Gerenciar itens">
+            <mat-icon class="text-ink/60">list_alt</mat-icon>
+          </button>
+          @if (invoice.status === 'Fechada') {
+          <button mat-icon-button (click)="printInvoice(invoice)" aria-label="Baixar PDF" title="Baixar PDF">
+            <mat-icon class="text-emerald-500">picture_as_pdf</mat-icon>
+          </button>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    @if (filteredInvoices().length === 0) {
+    <p class="text-center text-ink/45 py-8 text-[13.5px]">Nenhuma nota cadastrada ainda.</p>
+    }
+  </div>
+
+  @if (selectedInvoice(); as invoice) {
+  <div class="console-panel rounded-md px-6 py-5">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <p class="text-[11px] uppercase tracking-wider text-emerald-400/70 font-mono mb-1">
+          NOTA #{{ invoice.seqCode }} — {{ invoice.name }}
+        </p>
+        <p class="text-[12px] text-white/40 font-mono">{{ invoice.address }}</p>
+      </div>
+      <button mat-icon-button (click)="closePanel()" aria-label="Fechar">
+        <mat-icon class="text-white/40">close</mat-icon>
+      </button>
+    </div>
+
+    @if (invoice.items && invoice.items.length > 0) {
+    <ul class="mb-5 divide-y divide-white/10 font-mono text-[13px]">
+      @for (item of invoice.items; track item.id) {
+      <li class="flex items-center justify-between py-2">
+        <span class="text-white/80">{{ productName(item.productId) }}</span>
+        <span class="text-emerald-400">×{{ item.quantity }}</span>
+      </li>
+      }
+    </ul>
+    } @else {
+    <p class="text-[13px] text-white/35 font-mono mb-5">// nenhum item adicionado ainda</p>
+    }
+
+    @if (invoice.status === 'Aberta') {
+    <div class="flex flex-wrap items-end gap-3 pt-4 border-t border-white/10">
+      <mat-form-field appearance="outline" class="tech-field tech-field--dark w-56" subscriptSizing="dynamic">
+        <mat-label>Produto</mat-label>
+        <mat-select [(ngModel)]="newItem.productId">
+          @for (product of products(); track product.id) {
+          <mat-option [value]="product.id" [disabled]="product.quantity === 0">
+            {{ product.name }} ({{ product.sku }}) — {{ product.quantity }} disp.
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tech-field tech-field--dark w-32" subscriptSizing="dynamic">
+        <mat-label>Qtd</mat-label>
+        <input matInput type="number" min="1" [max]="availableStock() ?? 1" [(ngModel)]="newItem.quantity" />
+        @if (availableStock() !== null) {
+        <mat-hint class="text-emerald-400/60! font-mono">máx. {{ availableStock() }}</mat-hint>
+        }
+      </mat-form-field>
+
+      <button mat-stroked-button type="button" class="tech-btn" [disabled]="availableStock() === 0" (click)="addItem()">
+        <mat-icon>add</mat-icon>
+        Adicionar
+      </button>
+
+      <button mat-flat-button color="primary" type="button" class="ml-auto"
+        [disabled]="!invoice.items || invoice.items.length === 0" (click)="printInvoice(invoice)">
+        <mat-icon>print</mat-icon>
+        Imprimir e fechar nota
+      </button>
+    </div>
+    }
+  </div>
+  }
+
+</div>

@@ -20,6 +20,10 @@ func ConnectDatabase() {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
+	if err := database.Exec("CREATE SEQUENCE IF NOT EXISTS seq_code START 1").Error; err != nil {
+		panic(fmt.Sprintf("Failed to create sequence: %v", err))
+	}
+
 	if err := database.AutoMigrate(&models.Invoice{}); err != nil {
 		panic(fmt.Sprintf("Failed to migrate database: %v", err))
 	}

@@ -1,5 +1,3 @@
-# services/billing/Dockerfile
-
 # Stage 1: build
 FROM golang:1.25-alpine AS builder
 
@@ -9,13 +7,18 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /cmd/api/main .
 
-# Stage 2: imagem final, só o binário
+RUN CGO_ENABLED=0 go build -o /app/main ./cmd/api
+
+# Stage 2: imagem final
 FROM alpine:latest
 
 WORKDIR /app
-COPY --from=builder /app/cmd/api/main .
+
+COPY --from=builder /app/main /app/main
+
+RUN chmod +x /app/main
 
 EXPOSE 8081
-CMD ["./main"]
+
+CMD ["/app/main"]

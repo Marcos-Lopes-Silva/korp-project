@@ -80,7 +80,7 @@ func (s *ProductService) DeleteProduct(id uuid.UUID) error {
 	return nil
 }
 
-func (s *ProductService) ReduceStock(id uuid.UUID, quantity int) error {
+func (s *ProductService) ReduceStock(id uuid.UUID, quantity int64) error {
 	product, err := s.repo.GetProductByID(id)
 	if err != nil {
 		return apperrors.ErrNotFound
@@ -98,7 +98,7 @@ func (s *ProductService) ReduceStock(id uuid.UUID, quantity int) error {
 	return nil
 }
 
-func (s *ProductService) RestoreStock(id uuid.UUID, quantity int) error {
+func (s *ProductService) RestoreStock(id uuid.UUID, quantity int64) error {
 	product, err := s.repo.GetProductByID(id)
 	if err != nil {
 		return apperrors.ErrNotFound
@@ -116,7 +116,7 @@ func (s *ProductService) RestoreStock(id uuid.UUID, quantity int) error {
 	return nil
 }
 
-func (s *ProductService) VerifyAvailability(uuid uuid.UUID, quantity int) (bool, error) {
+func (s *ProductService) VerifyAvailability(uuid uuid.UUID, quantity int64) (bool, error) {
 	product, err := s.repo.GetProductByID(uuid)
 	if err != nil {
 		return false, apperrors.ErrNotFound

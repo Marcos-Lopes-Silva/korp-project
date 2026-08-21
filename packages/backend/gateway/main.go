@@ -40,6 +40,8 @@ func main() {
 	billingProxy := newProxy(billingURL)
 
 	r := gin.Default()
+	r.RedirectTrailingSlash = false
+	r.RedirectFixedPath = false
 
 	r.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -52,10 +54,31 @@ func main() {
 		c.Next()
 	})
 
+	stockHealthURL, _ := url.Parse(os.Getenv("STOCK_SERVICE_URL"))
+	billingHealthURL, _ := url.Parse(os.Getenv("BILLING_SERVICE_URL"))
+
+	r.GET("/stock/health", func(c *gin.Context) {
+		proxy := httputil.NewSingleHostReverseProxy(stockHealthURL)
+		c.Request.URL.Path = "/health"
+		proxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	r.GET("/billing/health", func(c *gin.Context) {
+		proxy := httputil.NewSingleHostReverseProxy(billingHealthURL)
+		c.Request.URL.Path = "/health"
+		proxy.ServeHTTP(c.Writer, c.Request)
+	})
+
+	r.Any("/products", func(c *gin.Context) {
+		stockProxy.ServeHTTP(c.Writer, c.Request)
+	})
 	r.Any("/products/*proxyPath", func(c *gin.Context) {
 		stockProxy.ServeHTTP(c.Writer, c.Request)
 	})
 
+	r.Any("/invoices", func(c *gin.Context) {
+		billingProxy.ServeHTTP(c.Writer, c.Request)
+	})
 	r.Any("/invoices/*proxyPath", func(c *gin.Context) {
 		billingProxy.ServeHTTP(c.Writer, c.Request)
 	})
@@ -64,5 +87,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	r.Run(":8000")
+	r.Run(":8080")
 }
